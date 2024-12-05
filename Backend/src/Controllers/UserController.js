@@ -118,7 +118,7 @@ export const logoutUser = async (req, res, next) => {
   res.clearCookie('token');
   const token = req.cookie.token || req.headers.authorization?.split(' ')[1];
 
-  await blacklistToken.crate({ token });
+  await blacklistToken.create({ token });
   res.status(200).json({
     msg: 'User logged out successfully',
     success: true,

@@ -254,3 +254,107 @@ Authorization: Bearer jwt-token
       "msg": "An unexpected error occurred"
     }
     ```
+
+# Captain Registration Endpoint Documentation
+
+## Endpoint
+
+`POST /captain/register`
+
+## Description
+
+This endpoint allows a new captain to register by providing the necessary information.
+
+## Request Body
+
+The request body must be in JSON format and include the following fields:
+
+- `fullname` (string, required): The full name of the captain.
+- `email` (string, required): The email address of the captain.
+- `password` (string, required): The password for the captain.
+- `vehicle.color` (string, required): The color of the vehicle.
+- `vehicle.plate` (string, required): The plate number of the vehicle.
+- `vehicle.capacity` (number, required): The capacity of the vehicle.
+- `vehicle.vehicleType` (string, required): The type of the vehicle.
+
+### Example Request
+
+```json
+{
+  "fullname": "John Doe",
+  "email": "johndoe@example.com",
+  "password": "password123",
+  "vehicle": {
+    "color": "red",
+    "plate": "ABC123",
+    "capacity": 4,
+    "vehicleType": "car"
+  }
+}
+```
+
+## Response
+
+### Success Response
+
+- **Status Code**: `201 Created`
+- **Body**:
+  ```json
+  {
+    "msg": "Captain registered successfully",
+    "success": true,
+    "token": "jwt-token",
+    "newCaptain": {
+      "fullname": "John Doe",
+      "email": "johndoe@example.com",
+      "vehicle": {
+        "color": "red",
+        "plate": "ABC123",
+        "capacity": 4,
+        "vehicleType": "car"
+      }
+    }
+  }
+  ```
+
+### Error Responses
+
+- **Status Code**: `400 Bad Request`
+
+  - **Body**:
+    ```json
+    {
+      "errors": [
+        {
+          "msg": "Please enter a valid email",
+          "param": "email",
+          "location": "body"
+        },
+        {
+          "msg": "Password must be at least 5 characters long",
+          "param": "password",
+          "location": "body"
+        }
+      ]
+    }
+    ```
+
+- **Status Code**: `409 Conflict`
+
+  - **Body**:
+    ```json
+    {
+      "msg": "Email already exists",
+      "success": false,
+      "message": "Email already exists"
+    }
+    ```
+
+- **Status Code**: `500 Internal Server Error`
+  - **Body**:
+    ```json
+    {
+      "msg": "Server error",
+      "success": false
+    }
+    ```
