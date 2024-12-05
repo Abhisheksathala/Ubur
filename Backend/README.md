@@ -358,3 +358,313 @@ The request body must be in JSON format and include the following fields:
       "success": false
     }
     ```
+
+### Example Request
+
+```json
+{
+  "fullname": "John Doe",
+  "email": "johndoe@example.com",
+  "password": "password123",
+  "vehicle": {
+    "color": "red",
+    "plate": "ABC123",
+    "capacity": 4,
+    "vehicleType": "car"
+  }
+}
+```
+
+## Response
+
+### Success Response
+
+- **Status Code**: `201 Created`
+- **Body**:
+  ```json
+  {
+    "msg": "Captain registered successfully",
+    "success": true,
+    "token": "jwt-token",
+    "newCaptain": {
+      "fullname": "John Doe",
+      "email": "johndoe@example.com",
+      "vehicle": {
+        "color": "red",
+        "plate": "ABC123",
+        "capacity": 4,
+        "vehicleType": "car"
+      }
+    }
+  }
+  ```
+
+### Error Responses
+
+- **Status Code**: `400 Bad Request`
+
+  - **Body**:
+    ```json
+    {
+      "errors": [
+        {
+          "msg": "Please enter a valid email",
+          "param": "email",
+          "location": "body"
+        },
+        {
+          "msg": "Password must be at least 5 characters long",
+          "param": "password",
+          "location": "body"
+        }
+      ]
+    }
+    ```
+
+- **Status Code**: `409 Conflict`
+
+  - **Body**:
+    ```json
+    {
+      "msg": "Email already exists",
+      "success": false,
+      "message": "Email already exists"
+    }
+    ```
+
+- **Status Code**: `500 Internal Server Error`
+  - **Body**:
+    ```json
+    {
+      "msg": "Server error",
+      "success": false
+    }
+    ```
+
+# Captain Login Endpoint Documentation
+
+## Endpoint
+
+`POST /captain/login`
+
+## Description
+
+This endpoint allows an existing captain to log in by providing their email and password.
+
+## Request Body
+
+The request body must be in JSON format and include the following fields:
+
+- `email` (string, required): The email address of the captain.
+- `password` (string, required): The password of the captain.
+
+### Example Request
+
+```json
+{
+  "email": "johndoe@example.com",
+  "password": "password123"
+}
+```
+
+## Response
+
+### Success Response
+
+- **Status Code**: `200 OK`
+- **Body**:
+  ```json
+  {
+    "msg": "Captain logged in successfully",
+    "success": true,
+    "token": "jwt-token",
+    "captain": {
+      "fullname": "John Doe",
+      "email": "johndoe@example.com",
+      "vehicle": {
+        "color": "red",
+        "plate": "ABC123",
+        "capacity": 4,
+        "vehicleType": "car"
+      }
+    }
+  }
+  ```
+
+### Error Responses
+
+- **Status Code**: `400 Bad Request`
+
+  - **Body**:
+    ```json
+    {
+      "errors": [
+        {
+          "msg": "Please enter a valid email",
+          "param": "email",
+          "location": "body"
+        },
+        {
+          "msg": "Password must be at least 5 characters long",
+          "param": "password",
+          "location": "body"
+        }
+      ]
+    }
+    ```
+
+- **Status Code**: `401 Unauthorized`
+
+  - **Body**:
+    ```json
+    {
+      "msg": "Invalid credentials - user not found"
+    }
+    ```
+
+- **Status Code**: `500 Internal Server Error`
+  - **Body**:
+    ```json
+    {
+      "msg": "Server error",
+      "success": false
+    }
+    ```
+
+# Captain Profile Endpoint Documentation
+
+## Endpoint
+
+`GET /captain/profile`
+
+## Description
+
+This endpoint allows an authenticated captain to retrieve their profile information.
+
+## Request Headers
+
+- `Authorization` (string, required): The JWT token of the authenticated captain.
+
+### Example Request
+
+```http
+GET /captain/profile HTTP/1.1
+Host: example.com
+Authorization: Bearer jwt-token
+```
+
+## Response
+
+### Success Response
+
+- **Status Code**: `200 OK`
+- **Body**:
+  ```json
+  {
+    "captain": {
+      "fullname": {
+        "firstname": "John",
+        "lastname": "Doe"
+      },
+      "email": "johndoe@example.com",
+      "vehicle": {
+        "color": "red",
+        "plate": "ABC123",
+        "capacity": 4,
+        "vehicleType": "car"
+      },
+      "status": "active",
+      "location": {
+        "lat": 40.7128,
+        "lng": -74.006
+      },
+      "createdAt": "2023-01-01T00:00:00.000Z",
+      "updatedAt": "2023-01-01T00:00:00.000Z"
+    },
+    "success": true,
+    "msg": "Captain profile retrieved successfully"
+  }
+  ```
+
+### Error Responses
+
+- **Status Code**: `401 Unauthorized`
+
+  - **Body**:
+    ```json
+    {
+      "msg": "No token provided. Access denied."
+    }
+    ```
+
+- **Status Code**: `404 Not Found`
+
+  - **Body**:
+    ```json
+    {
+      "msg": "Captain not found"
+    }
+    ```
+
+- **Status Code**: `500 Internal Server Error`
+  - **Body**:
+    ```json
+    {
+      "msg": "Server error captainprofile",
+      "success": false
+    }
+    ```
+
+# Captain Logout Endpoint Documentation
+
+## Endpoint
+
+`POST /captain/logout`
+
+## Description
+
+This endpoint allows an authenticated captain to log out by blacklisting their JWT token.
+
+## Request Headers
+
+- `Authorization` (string, required): The JWT token of the authenticated captain.
+
+### Example Request
+
+```http
+POST /captain/logout HTTP/1.1
+Host: example.com
+Authorization: Bearer jwt-token
+```
+
+## Response
+
+### Success Response
+
+- **Status Code**: `200 OK`
+- **Body**:
+  ```json
+  {
+    "msg": "Captain logged out successfully",
+    "success": true
+  }
+  ```
+
+### Error Responses
+
+- **Status Code**: `401 Unauthorized`
+
+  - **Body**:
+    ```json
+    {
+      "msg": "No token provided. Access denied."
+    }
+    ```
+
+- **Status Code**: `500 Internal Server Error`
+  - **Body**:
+    ```json
+    {
+      "msg": "An unexpected error occurred"
+    }
+    ```
