@@ -11,7 +11,6 @@ import captainRouter from './src/Routes/CaptainRouter.js';
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 app.use(express.static('public'));

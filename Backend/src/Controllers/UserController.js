@@ -3,11 +3,12 @@ import { validationResult } from 'express-validator';
 import BlacklistToken from './../Models/BlacklistTokenModel.js';
 
 export const registerUser = async (req, res, next) => {
-  const { firstname, lastname, email, password } = req.body;
-
+  const { fullname, email, password } = req.body;
+  const { firstname, lastname } = fullname || {};
   // Validate request
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log(errors.array()); // Log validation errors
     return res.status(400).json({ errors: errors.array() });
   }
 
@@ -48,6 +49,7 @@ export const registerUser = async (req, res, next) => {
       msg: 'User registered successfully',
       success: true,
       token,
+      user,
     });
   } catch (error) {
     console.error(error.message);
@@ -61,21 +63,26 @@ export const registerUser = async (req, res, next) => {
 
 export const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
-  if (!email) {
-    return res.status(400).json({ msg: 'Please enter email' });
+  if (!email || !password) {
+    return res
+      .status(400)
+      .json({ msg: 'Please enter both email and password' });
   }
+
   try {
     const existingUser = await UserModel.findOne({ email }).select('+password');
+    console.log(existingUser);
+    console.log(existingUser.password); // Log the stored hashed password
 
+    // Check if user is found
     if (!existingUser) {
       return res
         .status(401)
         .json({ msg: 'Invalid credentials - user not found' });
     }
-    const isMatch = await UserModel.comparePassword(
-      password,
-      existingUser.password,
-    );
+
+    // Use the instance method `comparePassword` on `existingUser`
+    const isMatch = await existingUser.comparePassword(password);
 
     if (!isMatch) {
       return res
@@ -86,7 +93,7 @@ export const loginUser = async (req, res, next) => {
     const token = existingUser.generateAuthToken();
 
     res.cookie('token', token, {
-      expires: new Date(Date.now() + 86400000),
+      expires: new Date(Date.now() + 86400000), // 1 day expiration
       httpOnly: true,
     });
 
@@ -96,7 +103,14 @@ export const loginUser = async (req, res, next) => {
       success: true,
       existingUser,
     });
-  } catch (error) {}
+  } catch (error) {
+    console.error('Error logging in:', error.message);
+    res.status(500).json({
+      msg: 'Error occurred while logging in user',
+      error: error.message,
+      success: false,
+    });
+  }
 };
 
 export const getUserProfile = async (req, res, next) => {

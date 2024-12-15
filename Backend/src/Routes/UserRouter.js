@@ -13,17 +13,16 @@ const UserRouter = express.Router();
 UserRouter.post(
   '/register',
   [
-    body('email')
-      .isEmail()
-      .withMessage(
-        'Please enter a valid email must be at least 5 characters long',
-      ),
+    body('fullname.firstname')
+      .isLength({ min: 5 })
+      .withMessage('First name must be at least 5 characters long'),
+    body('fullname.lastname')
+      .isLength({ min: 3 })
+      .withMessage('Last name must be at least 3 characters long'),
+    body('email').isEmail().withMessage('Please enter a valid email'),
     body('password')
       .isLength({ min: 5 })
       .withMessage('Password must be at least 5 characters long'),
-    body('fullname.fistname')
-      .isLength({ min: 5 })
-      .withMessage('Name must be at least 5 characters long'),
   ],
   registerUser,
 );
@@ -31,11 +30,7 @@ UserRouter.post(
 UserRouter.post(
   '/login',
   [
-    body('email')
-      .isEmail()
-      .withMessage(
-        'Please enter a valid email must be at least 5 characters long',
-      ),
+    body('email').isEmail().withMessage('Please enter a valid email'),
     body('password')
       .isLength({ min: 5 })
       .withMessage('Password must be at least 5 characters long'),

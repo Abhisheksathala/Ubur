@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 const captainSchema = new mongoose.Schema(
   {
     fullname: {
-      fistname: {
+      firstname: {
         type: String,
         required: true,
       },
@@ -76,7 +76,11 @@ captainSchema.methods.generateAuthToken = function () {
   return token;
 };
 
-captainSchema.methods.comparePassword = async (password) => {
+captainSchema.methods.comparePassword = async function (password) {
+  // `this` refers to the user instance
+  if (!password || !this.password) {
+    throw new Error('Password or stored password is missing');
+  }
   return await bcrypt.compare(password, this.password);
 };
 

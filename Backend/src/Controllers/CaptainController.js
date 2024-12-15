@@ -7,25 +7,23 @@ export const registerCaptain = async (req, res, next) => {
   if (!error.isEmpty()) {
     return res.status(400).json({ errors: error.array() });
   }
-  const {
-    fistname,
-    lastname,
-    email,
-    password,
-    color,
-    plate,
-    capacity,
-    vechicleType,
-  } = req.body;
 
+  const { fullname, email, password, vehicle } = req.body;
+
+  // Extracting the fullname and vehicle fields
+  const { firstname, lastname } = fullname || {};
+  const { color, plate, capacity, vehicleType } = vehicle || {};
+
+  // Check if required fields are provided
   if (
-    !fistname ||
+    !firstname ||
+    !lastname ||
     !email ||
     !password ||
     !color ||
     !plate ||
     !capacity ||
-    !vechicleType
+    !vehicleType
   ) {
     return res.status(400).json({ msg: 'Please enter all fields' });
   }
@@ -40,20 +38,25 @@ export const registerCaptain = async (req, res, next) => {
       });
     }
 
-    const hashPassword = await existingCaptain.hashPassword(password);
+    const hashedPassword = await captainModel.hashPassword(password);
 
+    // Create new captain
     const newCaptain = new captainModel({
-      fistname,
-      lastname,
+      fullname: {
+        firstname,
+        lastname,
+      },
       email,
-      password,
-      color,
-      plate,
-      capacity,
-      vechicleType,
+      password: hashedPassword,
+      vehicle: {
+        color,
+        plate,
+        capacity,
+        vehicleType,
+      },
     });
 
-    const token = await captainModel.generateAuthToken();
+    const token = await newCaptain.generateAuthToken();
 
     await newCaptain.save();
 
@@ -69,7 +72,7 @@ export const registerCaptain = async (req, res, next) => {
   }
 };
 
-export const LoginCaptain = (req, res) => {
+export const LoginCaptain = async (req, res) => {
   const error = validationResult(req);
   if (!error.isEmpty()) {
     return res.status(400).json({ errors: error.array() });
@@ -79,28 +82,26 @@ export const LoginCaptain = (req, res) => {
     return res.status(400).json({ msg: 'Please enter all fields' });
   }
   try {
-    const captain = captainModel.findOne({ email });
+    const captain = await captainModel.findOne({ email }).select('+password');
+
     if (!captain) {
       return res
         .status(401)
         .json({ msg: 'Invalid credentials - user not found' });
     }
-    const isMatch = captain.comparePassword(password);
+    const isMatch = await captain.comparePassword(password);
     if (!isMatch) {
       return res
         .status(401)
         .json({ msg: 'Invalid credentials - wrong password' });
     }
     const token = captain.generateAuthToken();
-    res.cookie('token', token, {
-      expires: new Date(Date.now() + 86400000),
-      httpOnly: true,
-    });
+
     res.status(200).json({
       msg: 'Captain logged in successfully',
-      success: true,
       token,
       captain,
+      success: true,
     });
   } catch (error) {
     console.log(error);
