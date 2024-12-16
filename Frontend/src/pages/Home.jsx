@@ -1,10 +1,12 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import logo from '../assets/10-inspirational-graphic-desig-unscreen.gif';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import LocationSearch from './../components/LocationSearch';
 import VechiclePanel from '../components/VechiclePanel';
 import ConfirmRide from './../components/ConfirmRide';
+import LookingForDriver from './../components/LookingForDriver';
+import WaitingForDriver from '../components/WaitforDriver';
 
 const Home = () => {
   const [form, setForm] = useState({
@@ -14,8 +16,15 @@ const Home = () => {
 
   const [panelopen, setPanelOpen] = useState(false);
   const [vehicle, setVehicle] = useState(false);
+  const [confirmRidePanel, setConfirmRidePanel] = useState(false);
+  const [vechleFound, setVechleFound] = useState(false);
+  const [waitingfordriver, setWaitingfordriver] = useState(false);
+
   const panelREF = useRef(null);
   const vehicleREF = useRef(null);
+  const confirmRidePanelREF = useRef(null);
+  const vechleFoundREF = useRef(null);
+  const waitingfordriverRef = useRef(null);
 
   const handdleChange = (e) => {
     setForm({
@@ -23,11 +32,9 @@ const Home = () => {
       [e.target.name]: e.target.value,
     });
   };
-
   const handdleSubmit = (e) => {
     e.preventDefault();
   };
-
   useGSAP(() => {
     if (panelopen) {
       gsap.to(panelREF.current, {
@@ -39,7 +46,6 @@ const Home = () => {
       });
     }
   }, [panelopen]);
-
   useGSAP(
     function () {
       if (vehicle) {
@@ -54,6 +60,41 @@ const Home = () => {
     },
     [vehicle],
   );
+  useGSAP(() => {
+    if (confirmRidePanel) {
+      gsap.to(confirmRidePanelREF.current, {
+        transform: 'translateY(0)',
+      });
+    } else {
+      gsap.to(confirmRidePanelREF.current, {
+        transform: 'translateY(100%)',
+      });
+    }
+  }, [confirmRidePanel]);
+
+  useGSAP(() => {
+    if (vechleFound) {
+      gsap.to(vechleFoundREF.current, {
+        transform: 'translateY(0%)',
+      });
+    } else {
+      gsap.to(vechleFoundREF.current, {
+        transform: 'translateY(100%)',
+      });
+    }
+  }, [vechleFound]);
+
+  useGSAP(() => {
+    if (waitingfordriver) {
+      gsap.to(waitingfordriverRef.current, {
+        transform: 'translateY(0%)',
+      });
+    } else {
+      gsap.to(waitingfordriverRef.current, {
+        transform: 'translateY(100%)',
+      });
+    }
+  }, [waitingfordriver]);
 
   return (
     <div className="relative h-screen overflow-hidden">
@@ -175,18 +216,47 @@ const Home = () => {
           <h2 className="text-xl font-semibold">$192.33</h2>
         </div> */}
         </div>
+        {/*  */}
         <VechiclePanel
           vehicle={vehicle}
           setVehicle={setVehicle}
+          setConfirmRidePanel={setConfirmRidePanel}
           setPanelOpen={setPanelOpen}
         />
       </div>
 
       <div
-        ref={vehicleREF}
+        ref={confirmRidePanelREF}
+        className="fixed bottom-0 z-10 w-full p-5 translate-y-full bg-white t"
+      >
+        <ConfirmRide
+          setConfirmRidePanel={setConfirmRidePanel}
+          confirmRidePanel={confirmRidePanel}
+          setVehicle={setVehicle}
+          setVechleFound={setVechleFound}
+        />
+      </div>
+      <div
+        ref={vechleFoundREF}
         className="fixed bottom-0 z-10 w-full p-5 translate-y-full bg-white"
       >
-        <ConfirmRide />
+        <LookingForDriver
+          vechleFound={vechleFound}
+          setVechleFound={setVechleFound}
+          setConfirmRidePanel={setConfirmRidePanel}
+        />
+      </div>
+      <div
+        ref={waitingfordriverRef}
+        className="fixed bottom-0 z-10 w-full p-5 translate-y-full bg-white"
+      >
+        <WaitingForDriver
+          vechleFound={vechleFound}
+          setVechleFound={setVechleFound}
+          setConfirmRidePanel={setConfirmRidePanel}
+          waitingfordriver={waitingfordriver}
+          setWaitingfordriver={setWaitingfordriver}
+        />
       </div>
     </div>
   );
